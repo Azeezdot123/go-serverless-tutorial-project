@@ -1,18 +1,27 @@
 package user
 
 import (
+	"encoding/json"
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
+	"github.com/azeezdot123/go-serverless/pkg/validators"
 )
 
 // defining error types I want to send as response
 var(
-	ErrorFailedToFetchRecord = "failed to fetch record"
-	ErrorFailedToUnMarshalRecord = "failed to unmarshal record"
+	ErrorFailedToFetchRecord		= "failed to fetch record"
+	ErrorFailedToUnMarshalRecord	= "failed to unmarshal record"
+	ErrorInvalidUserData			= "Invalid user data"
+	ErrorInvalidEmail				= " Invalid email"
+	ErrorCouldNotMarshalItem 		= "failed to marshal item"
+	ErrorCouldNotDeleteItem 		= "could not delete"
+	ErrorCouldNotDynamoPutItem 		= "could not dynamo put item"
+	ErrorUserAlreadyExists			= "user already exists"
+	ErrorUserDoesNotExist			= "user does not exist"
 )
 
 type User struct{
@@ -64,6 +73,38 @@ func FetchUsers(tableName string, dynaClient dynamodbiface.DynamoDBAPI)(*[]User,
 	return items, nil
 }
 
-func CreateUser()(){}
+func CreateUser(req events.APIGatewayProxyRequest, tableName string, dynaClient dynamodbiface.DynamoDBAPI)(*User, error){
+	var u User
+
+	if err := json.Unmarshal([]byte(req.body), &u); err != nil {
+		return nil, errors.New(ErrorInvalidUserData)
+	}
+	if !validators.IsEmailValid(u.Email){
+		return nil, errors.New(ErrorInvalidEmail)
+	}
+
+	currentUser, _ := FetchUser(u.Email, tableName, dynaClient)
+	if currentUser != nil && len(currentUser.Email) != 0 {
+		return nil, errors.New(ErrorUserAlreadyExists)
+	}
+
+	av, err := dynamodbattribute.marshalMap(u)
+	if err != nil {
+		return nil, errors.New(ErrorCouldNotMarshalItem)
+	}
+
+	input := &dynamodb.PutItemInput{
+		Item: av,
+		TableName: aws.String(tableName),
+	}
+
+	_, err := dynaClient.PutItem(input)
+	if err != nil {
+		return nil, errors.New(ErrorCouldNotDynamoPutItem)
+	}
+
+	return &u, nil
+}
+
 func UpdateUser()(){}
 func DeleteUser() error{}
