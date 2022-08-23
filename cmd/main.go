@@ -16,9 +16,12 @@ var(
 	dynaClient dynamodbiface.DynamoDBAPI
 )
 
+const tableName = "LambdaTesting"
+
 func main() {
 	region := os.Getenv("AWS_REGION")
-	awsSession, err := session.NewSession(&aws.Config{Region: aws.String(region)})
+	awsSession, err := session.NewSession(&aws.Config{
+		Region: aws.String(region)},)
 	if err != nil {
 		return
 	}
@@ -26,19 +29,22 @@ func main() {
 	lambda.Start(handler)
 }
 
-const tableName = "LambdaTesting"
 
 func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error){
 	switch req.HTTPMethod{
 	case "GET":
 		return handlers.GetUser(req, tableName, dynaClient)
+
 	case "POST":
 		return handlers.CreateUser(req, tableName, dynaClient)
+
 	case "PUT":
 		return handlers.UpdateUser(req, tableName, dynaClient)
+
 	case "DELETE":
 		return handlers.DeleteUser(req, tableName, dynaClient)
-	}
+		
 	default:
 		return handlers.UnhandledMethod()
+	}
 }
