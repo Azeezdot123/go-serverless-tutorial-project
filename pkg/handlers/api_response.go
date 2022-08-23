@@ -10,7 +10,7 @@ func apiResponse(status int, body interface{}) (*events.APIGatewayProxyResponse,
 	resp := events.APIGatewayProxyResponse{Headers: map[string]string["Content-Type":"application/json"]}
 	resp.StatusCode = status
 
-	string, _ := json.Marshal(body)
+	stringBody, _ := json.Marshal(body)
 	resp.Body = string(stringBody)
 	return &resp, nil
 }
