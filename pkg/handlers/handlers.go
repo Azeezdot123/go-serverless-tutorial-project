@@ -5,7 +5,6 @@ import (
 	"os/user"
 
 	"github.com/azeezdot123/go-serverless/pkg/user"
-	"github.com/azeezdot123/go-serverless/pkg/user.go"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws"
