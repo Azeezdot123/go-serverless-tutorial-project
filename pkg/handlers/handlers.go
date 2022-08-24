@@ -28,7 +28,7 @@ func GetUser(req events.APIGatewayProxyRequest, tableName string, dynaClient dyn
 		return apiResponse(http.StatusOK, result)
 	}
 
-	result, err := user.FetchUsers(email, tableName, dynaClient)
+	result, err := user.FetchUsers(tableName, dynaClient)
 		if err != nil {
 			return apiResponse(http.StatusBadRequest, ErrorBody{
 				aws.String(err.Error()),
