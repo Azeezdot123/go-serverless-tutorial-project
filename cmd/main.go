@@ -16,7 +16,7 @@ var(
 	dynaClient dynamodbiface.DynamoDBAPI
 )
 
-const tableName = "LambdaTesting"
+const tableName = "go-serverless"
 
 func main() {
 	region := os.Getenv("AWS_REGION")
